@@ -2501,6 +2501,7 @@ _EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
 # pretty bizarre, and a tzinfo subclass can override fromutc() if it is.
 
 try:
+    raise ImportError("CAPI disabled")
     from _datetime import *
 except ImportError:
     pass
