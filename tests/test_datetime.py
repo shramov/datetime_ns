@@ -1,23 +1,16 @@
+import datetime_ns
+datetime_ns.datetime_patch()
+
 import unittest
 import sys
 
 from test.support import run_unittest
-from test.support.import_helper import import_fresh_module
 
+import tests.datetimetester
 
-TESTS = 'test.datetimetester'
+TESTS = 'tests.datetimetester'
 
-try:
-    pure_tests = import_fresh_module(TESTS, fresh=['datetime', '_strptime'],
-                                     blocked=['_datetime'])
-    fast_tests = import_fresh_module(TESTS, fresh=['datetime',
-                                                   '_datetime', '_strptime'])
-finally:
-    # XXX: import_fresh_module() is supposed to leave sys.module cache untouched,
-    # XXX: but it does not, so we have to cleanup ourselves.
-    for modname in ['datetime', '_datetime', '_strptime']:
-        sys.modules.pop(modname, None)
-test_modules = [pure_tests, fast_tests]
+test_modules = [tests.datetimetester]
 test_suffixes = ["_Pure", "_Fast"]
 # XXX(gb) First run all the _Pure tests, then all the _Fast tests.  You might
 # not believe this, but in spite of all the sys.modules trickery running a _Pure
