@@ -3755,21 +3755,21 @@ class TestTimeTZ(TestTime, TZInfoBase, unittest.TestCase):
     def test_compat_unpickle(self):
         tests = [
             b"cdatetime\ntime\n(S'\\x05\\x06\\x07\\x01\\xe2@'\n"
-            b"ctest.datetimetester\nPicklableFixedOffset\n(tR"
+            b"ctests.datetimetester\nPicklableFixedOffset\n(tR"
             b"(dS'_FixedOffset__offset'\ncdatetime\ntimedelta\n"
             b"(I-1\nI68400\nI0\ntRs"
             b"S'_FixedOffset__dstoffset'\nNs"
             b"S'_FixedOffset__name'\nS'cookie'\nsbtR.",
 
             b'cdatetime\ntime\n(U\x06\x05\x06\x07\x01\xe2@'
-            b'ctest.datetimetester\nPicklableFixedOffset\n)R'
+            b'ctests.datetimetester\nPicklableFixedOffset\n)R'
             b'}(U\x14_FixedOffset__offsetcdatetime\ntimedelta\n'
             b'(J\xff\xff\xff\xffJ0\x0b\x01\x00K\x00tR'
             b'U\x17_FixedOffset__dstoffsetN'
             b'U\x12_FixedOffset__nameU\x06cookieubtR.',
 
             b'\x80\x02cdatetime\ntime\nU\x06\x05\x06\x07\x01\xe2@'
-            b'ctest.datetimetester\nPicklableFixedOffset\n)R'
+            b'ctests.datetimetester\nPicklableFixedOffset\n)R'
             b'}(U\x14_FixedOffset__offsetcdatetime\ntimedelta\n'
             b'J\xff\xff\xff\xffJ0\x0b\x01\x00K\x00\x87R'
             b'U\x17_FixedOffset__dstoffsetN'
@@ -4138,7 +4138,7 @@ class TestDateTimeTZ(TestDateTime, TZInfoBase, unittest.TestCase):
         tests = [
             b'cdatetime\ndatetime\n'
             b"(S'\\x07\\xdf\\x0b\\x1b\\x14;\\x01\\x01\\xe2@'\n"
-            b'ctest.datetimetester\nPicklableFixedOffset\n(tR'
+            b'ctests.datetimetester\nPicklableFixedOffset\n(tR'
             b"(dS'_FixedOffset__offset'\ncdatetime\ntimedelta\n"
             b'(I-1\nI68400\nI0\ntRs'
             b"S'_FixedOffset__dstoffset'\nNs"
@@ -4146,7 +4146,7 @@ class TestDateTimeTZ(TestDateTime, TZInfoBase, unittest.TestCase):
 
             b'cdatetime\ndatetime\n'
             b'(U\n\x07\xdf\x0b\x1b\x14;\x01\x01\xe2@'
-            b'ctest.datetimetester\nPicklableFixedOffset\n)R'
+            b'ctests.datetimetester\nPicklableFixedOffset\n)R'
             b'}(U\x14_FixedOffset__offsetcdatetime\ntimedelta\n'
             b'(J\xff\xff\xff\xffJ0\x0b\x01\x00K\x00tR'
             b'U\x17_FixedOffset__dstoffsetN'
@@ -4154,7 +4154,7 @@ class TestDateTimeTZ(TestDateTime, TZInfoBase, unittest.TestCase):
 
             b'\x80\x02cdatetime\ndatetime\n'
             b'U\n\x07\xdf\x0b\x1b\x14;\x01\x01\xe2@'
-            b'ctest.datetimetester\nPicklableFixedOffset\n)R'
+            b'ctests.datetimetester\nPicklableFixedOffset\n)R'
             b'}(U\x14_FixedOffset__offsetcdatetime\ntimedelta\n'
             b'J\xff\xff\xff\xffJ0\x0b\x01\x00K\x00\x87R'
             b'U\x17_FixedOffset__dstoffsetN'
