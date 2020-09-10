@@ -736,6 +736,9 @@ class TestTimeDelta(HarmlessMixedComparison, unittest.TestCase):
                    microseconds=999999)),
            "999999999 days, 23:59:59.999999")
 
+        if td.resolution < td(microseconds=1):
+            eq(str(td(nanoseconds=1)), "0:00:00.000000001")
+
     def test_repr(self):
         name = 'datetime.' + self.theclass.__name__
         self.assertEqual(repr(self.theclass(1)),
@@ -754,6 +757,12 @@ class TestTimeDelta(HarmlessMixedComparison, unittest.TestCase):
                          "%s(days=1, microseconds=100)" % name)
         self.assertEqual(repr(self.theclass(seconds=1, microseconds=100)),
                          "%s(seconds=1, microseconds=100)" % name)
+
+        if timedelta.resolution < timedelta(microseconds=1):
+            self.assertEqual(repr(self.theclass(nanoseconds=100200)),
+                             "%s(nanoseconds=100200)" % name)
+            self.assertEqual(repr(self.theclass(seconds=1, nanoseconds=100200)),
+                             "%s(seconds=1, nanoseconds=100200)" % name)
 
     def test_roundtrip(self):
         for td in (timedelta(days=999999999, hours=23, minutes=59,
@@ -1989,7 +1998,10 @@ class TestDateTime(TestDate):
         self.assertEqual(dt.microsecond, 8000)
 
     def test_roundtrip(self):
-        for dt in (self.theclass(1, 2, 3, 4, 5, 6, 7),
+        test = self.theclass(1, 2, 3, 4, 5, 6, 7)
+        if timedelta.resolution < timedelta(microseconds=1):
+            test = self.theclass(1, 2, 3, 4, 5, 6, nanosecond=7)
+        for dt in (test,
                    self.theclass.now()):
             # Verify dt -> string -> datetime identity.
             s = repr(dt)
@@ -1999,9 +2011,14 @@ class TestDateTime(TestDate):
             self.assertEqual(dt, dt2)
 
             # Verify identity via reconstructing from pieces.
-            dt2 = self.theclass(dt.year, dt.month, dt.day,
-                                dt.hour, dt.minute, dt.second,
-                                dt.microsecond)
+            if timedelta.resolution < timedelta(microseconds=1):
+                dt2 = self.theclass(dt.year, dt.month, dt.day,
+                                    dt.hour, dt.minute, dt.second,
+                                    nanosecond=dt.nanosecond)
+            else:
+                dt2 = self.theclass(dt.year, dt.month, dt.day,
+                                    dt.hour, dt.minute, dt.second,
+                                    dt.microsecond)
             self.assertEqual(dt, dt2)
 
     def test_isoformat(self):
@@ -2047,6 +2064,16 @@ class TestDateTime(TestDate):
         tz = FixedOffset(timedelta(seconds=16), 'XXX')
         t = self.theclass(2, 3, 2, tzinfo=tz)
         self.assertEqual(t.isoformat(), "0002-03-02T00:00:00+00:00:16")
+
+        if timedelta.resolution < timedelta(microseconds=1):
+            t = self.theclass(1, 2, 3, 4, 5, 1, nanosecond=123456)
+            self.assertEqual(t.isoformat(timespec='seconds'), "0001-02-03T04:05:01")
+            self.assertEqual(t.isoformat(timespec='milliseconds'), "0001-02-03T04:05:01.000")
+            self.assertEqual(t.isoformat(timespec='microseconds'), "0001-02-03T04:05:01.000123")
+            self.assertEqual(t.isoformat(timespec='nanoseconds'), "0001-02-03T04:05:01.000123456")
+            self.assertEqual(t.isoformat(timespec='auto'), "0001-02-03T04:05:01.000123456")
+
+            self.assertEqual(str(t), "0001-02-03 04:05:01.000123456")
 
     def test_isoformat_timezone(self):
         tzoffsets = [
@@ -3347,6 +3374,10 @@ class TestTime(HarmlessMixedComparison, unittest.TestCase):
                          "%s(12, 2, 3)" % name)
         self.assertEqual(repr(self.theclass(23, 15, 0, 0)),
                          "%s(23, 15)" % name)
+
+        if timedelta.resolution < timedelta(microseconds=1):
+            self.assertEqual(repr(self.theclass(1, 2, 3, nanosecond=4)),
+                             "%s(1, 2, 3, nanosecond=4)" % name)
 
     def test_resolution_info(self):
         self.assertIsInstance(self.theclass.min, self.theclass)

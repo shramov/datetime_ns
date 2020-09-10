@@ -592,7 +592,11 @@ class timedelta:
         if self._seconds:
             args.append("seconds=%d" % self._seconds)
         if self._nanoseconds:
-            args.append("microseconds=%d" % self.microseconds)
+            us, ns = divmod(self._nanoseconds, 1000)
+            if ns == 0:
+                args.append("microseconds=%d" % us)
+            else:
+                args.append("nanoseconds=%d" % self._nanoseconds)
         if not args:
             args.append('0')
         return "%s.%s(%s)" % (self.__class__.__module__,
@@ -1441,7 +1445,11 @@ class time:
     def __repr__(self):
         """Convert to formal string, for repr()."""
         if self._nanosecond != 0:
-            s = ", %d, %d" % (self._second, self.microsecond)
+            us, ns = divmod(self._nanosecond, 1000)
+            if ns == 0:
+                s = ", %d, %d" % (self._second, us)
+            else:
+                s = ", %d, nanosecond=%d" % (self._second, self._nanosecond)
         elif self._second != 0:
             s = ", %d" % self._second
         else:
@@ -1979,10 +1987,14 @@ class datetime(date):
 
     def __repr__(self):
         """Convert to formal string, for repr()."""
+        us, ns = divmod(self._nanosecond, 1000)
         L = [self._year, self._month, self._day,  # These are never zero
-             self._hour, self._minute, self._second, self.microsecond]
-        if L[-1] == 0:
-            del L[-1]
+             self._hour, self._minute, self._second]
+        if self._nanosecond != 0:
+            if ns == 0:
+                L.append(us)
+            else:
+                L.append("nanosecond=" + str(self._nanosecond))
         if L[-1] == 0:
             del L[-1]
         s = "%s.%s(%s)" % (self.__class__.__module__,
