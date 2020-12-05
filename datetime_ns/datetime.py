@@ -403,10 +403,12 @@ def _check_date_fields(year, month, day):
         raise ValueError('day must be in 1..%d' % dim, day)
     return year, month, day
 
-def _check_time_fields(hour, minute, second, microsecond, nanosecond, fold):
+def _check_time_fields(hour, minute, second, subsecond, resolution, microsecond, nanosecond, fold):
     hour = _index(hour)
     minute = _index(minute)
     second = _index(second)
+    subsecond = _index(subsecond)
+    resolution = _index(resolution)
     microsecond = _index(microsecond)
     nanosecond = _index(nanosecond)
     if not 0 <= hour <= 23:
@@ -1278,13 +1280,13 @@ class time:
     """
     __slots__ = '_hour', '_minute', '_second', '_nanosecond', '_tzinfo', '_hashcode', '_fold'
 
-    def __new__(cls, hour=0, minute=0, second=0, microsecond=0, tzinfo=None, *, nanosecond=0, fold=0):
+    def __new__(cls, hour=0, minute=0, second=0, subsecond=0, tzinfo=None, *, resolution=1000000, microsecond=0, nanosecond=0, fold=0):
         """Constructor.
 
         Arguments:
 
         hour, minute (required)
-        second, microsecond, nanosecond (default to zero)
+        second, subsecond, microsecond, nanosecond (default to zero)
         tzinfo (default to None)
         fold (keyword only, default to zero)
         """
@@ -1305,7 +1307,7 @@ class time:
             self._hashcode = -1
             return self
         hour, minute, second, nanosecond, fold = _check_time_fields(
-            hour, minute, second, microsecond, nanosecond, fold)
+            hour, minute, second, subsecond, resolution, microsecond, nanosecond, fold)
         _check_tzinfo_arg(tzinfo)
         self = object.__new__(cls)
         self._hour = hour
@@ -1554,7 +1556,7 @@ class time:
         return offset
 
     def replace(self, hour=None, minute=None, second=None, microsecond=None,
-                tzinfo=True, *, fold=None):
+                tzinfo=True, *, nanosecond=None, fold=None):
         """Return a new time with new values for the specified fields."""
         if hour is None:
             hour = self.hour
@@ -1562,13 +1564,16 @@ class time:
             minute = self.minute
         if second is None:
             second = self.second
-        if microsecond is None:
-            microsecond = self.microsecond
+        if nanosecond is None:
+            if microsecond is None:
+                nanosecond = self.nanosecond
+            else:
+                nanosecond = microsecond * 1000
         if tzinfo is True:
             tzinfo = self.tzinfo
         if fold is None:
             fold = self._fold
-        return type(self)(hour, minute, second, microsecond, tzinfo, fold=fold)
+        return type(self)(hour, minute, second, nanosecond=nanosecond, tzinfo=tzinfo, fold=fold)
 
     # Pickle support.
 
@@ -1627,7 +1632,7 @@ class datetime(date):
     __slots__ = date.__slots__ + time.__slots__
 
     def __new__(cls, year, month=None, day=None, hour=0, minute=0, second=0,
-                microsecond=0, tzinfo=None, *, nanosecond=0, fold=0):
+                subsecond=0, tzinfo=None, *, resolution=1000000, microsecond=0, nanosecond=0, fold=0):
         if (isinstance(year, (bytes, str)) and len(year) == 10 and
             1 <= ord(year[2:3])&0x7F <= 12):
             # Pickle support
@@ -1646,7 +1651,7 @@ class datetime(date):
             return self
         year, month, day = _check_date_fields(year, month, day)
         hour, minute, second, nanosecond, fold = _check_time_fields(
-            hour, minute, second, microsecond, nanosecond, fold)
+            hour, minute, second, subsecond, resolution, microsecond, nanosecond, fold)
         _check_tzinfo_arg(tzinfo)
         self = object.__new__(cls)
         self._year = year
@@ -1887,7 +1892,7 @@ class datetime(date):
 
     def replace(self, year=None, month=None, day=None, hour=None,
                 minute=None, second=None, microsecond=None, tzinfo=True,
-                *, fold=None):
+                *, nanosecond=None, fold=None):
         """Return a new datetime with new values for the specified fields."""
         if year is None:
             year = self.year
@@ -1901,14 +1906,19 @@ class datetime(date):
             minute = self.minute
         if second is None:
             second = self.second
-        if microsecond is None:
-            microsecond = self.microsecond
+        if nanosecond is not None and microsecond is not None:
+            raise ValueError("Both microsecond and nanosecond are not None")
+        if nanosecond is None:
+            if microsecond is None:
+                nanosecond = self.nanosecond
+            else:
+                nanosecond = microsecond * 1000
         if tzinfo is True:
             tzinfo = self.tzinfo
         if fold is None:
             fold = self.fold
         return type(self)(year, month, day, hour, minute, second,
-                          microsecond, tzinfo, fold=fold)
+                          nanosecond=nanosecond, tzinfo=tzinfo, fold=fold)
 
     def _local_timezone(self):
         if self.tzinfo is None:
